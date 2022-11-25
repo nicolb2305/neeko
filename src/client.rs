@@ -1,6 +1,8 @@
 pub mod constants;
+use crate::endpoints::constants::Error as ApiError;
 use self::constants::Region;
-use std::collections::HashMap;
+use std::{collections::HashMap, error::Error};
+use reqwest::StatusCode;
 use serde::de::DeserializeOwned;
 
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -33,7 +35,7 @@ impl Client {
         endpoint: String, 
         short_region: bool, 
         query: Option<HashMap<&str, String>>
-    ) -> Result<T> 
+    ) -> std::result::Result<T, Box<dyn Error>> 
     where
         T: DeserializeOwned
     {
@@ -58,9 +60,11 @@ impl Client {
             .send()
             .await?;
 
-        match resp.error_for_status() {
-            Ok(v) => Ok(v.json().await?),
-            Err(e) => return Err(e)
+        let status = resp.status();
+
+        match status {
+            StatusCode::OK => Ok(resp.json().await?),
+            _ => Err(Box::new(ApiError::new(resp.json().await?)))
         }
     }
 }

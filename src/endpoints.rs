@@ -4,7 +4,8 @@ use reqwest::Method;
 use crate::client::Client;
 use self::constants::{SummonerDTO, MatchDto, MatchTimelineDto, CurrentGameInfo, FeaturedGames, PlatformDataDto, AccountDto, ActiveShardDto, ChampionMasteryDto, ChampionInfo, Game};
 
-type Result<T> = std::result::Result<T, reqwest::Error>;
+// type Result<T> = std::result::Result<T, reqwest::Error>;
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 fn insert_query<'a, T: ToString>(
     query: &mut HashMap<&'a str, String>, 

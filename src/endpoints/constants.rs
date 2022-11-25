@@ -1,5 +1,38 @@
 use serde::Deserialize;
 
+#[derive(Debug)]
+pub struct Error {
+    source: ResponseError
+}
+
+impl Error {
+    pub fn new(source: ResponseError) -> Error {
+        Error {
+            source
+        }
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:#?}", self.source)
+    }
+}
+
+impl std::error::Error for Error {}
+
+#[derive(Deserialize, Debug)]
+pub struct ResponseError {
+    pub status: ErrorStatus
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ErrorStatus {
+    pub message: String,
+    pub status_code: i32
+}
+
+
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SummonerDTO {
