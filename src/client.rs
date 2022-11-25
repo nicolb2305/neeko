@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use serde::de::DeserializeOwned;
 
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+type Result<T> = std::result::Result<T, reqwest::Error>;
 
 pub struct Client {
     client: reqwest::Client,
@@ -11,7 +12,7 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(api_key: String, region: Region) -> Result<Self, reqwest::Error> {
+    pub fn new(api_key: String, region: Region) -> Result<Self> {
         let mut headers = reqwest::header::HeaderMap::new();
 
         headers.insert("X-Riot-Token", api_key.parse().unwrap());
@@ -32,7 +33,7 @@ impl Client {
         endpoint: String, 
         short_region: bool, 
         query: Option<HashMap<&str, String>>
-    ) -> Result<T, reqwest::Error> 
+    ) -> Result<T> 
     where
         T: DeserializeOwned
     {
@@ -53,12 +54,13 @@ impl Client {
             None => req_builder
         };
 
-        let req = req_builder
+        let resp = req_builder
             .send()
-            .await?
-            .json()
             .await?;
 
-        Ok(req)
+        match resp.error_for_status() {
+            Ok(v) => Ok(v.json().await?),
+            Err(e) => return Err(e)
+        }
     }
 }
