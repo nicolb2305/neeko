@@ -400,6 +400,205 @@ pub struct MatchTimelineInfoFrameEventVictimDamageReceived {
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct CurrentGameInfo {
+    pub game_id: i64,
+    pub game_type: String,
+    pub game_start_time: i64,
+    pub map_id: i64,
+    pub game_length: i64,
+    pub platform_id: String,
+    pub game_mode: String,
+    pub banned_champions: Vec<BannedChampion>,
+    pub game_queue_config_id: i64,
+    pub observers: Observer,
+    pub participants: Vec<CurrentGameParticipant>
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct BannedChampion {
+    pub pick_turn: i32,
+    pub champion_id: i64,
+    pub team_id: i64
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Observer {
+    pub encryption_key: String
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct CurrentGameParticipant {
+    pub champion_id: i64,
+    pub perks: Perks,
+    pub profile_icon_id: i64,
+    pub bot: bool,
+    pub team_id: i64,
+    pub summoner_name: String,
+    pub spell1_id: i64,
+    pub spell2_id: i64,
+    pub game_customization_objects: Vec<GameCustomizationObject>
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Perks {
+    pub perk_ids: Vec<i64>,
+    pub perk_style: i64,
+    pub perk_sub_style: i64
+}
+
+#[derive(Deserialize, Debug)]
+pub struct GameCustomizationObject {
+    pub category: String,
+    pub content: String
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct FeaturedGames {
+    pub game_list: Vec<FeaturedGameInfo>,
+    pub client_refresh_interval: i64
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct FeaturedGameInfo {
+    pub game_mode: String,
+    pub game_length: i64,
+    pub map_id: i64,
+    pub game_type: String,
+    pub banned_champions: Vec<BannedChampion>,
+    pub game_id: i64,
+    pub observers: Observer,
+    pub game_queue_config_id: i64,
+    pub game_start_time: i64,
+    pub participants: Vec<Participant>,
+    pub platform_id: String
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Participant {
+    pub bot: bool,
+    pub spell1_id: i64,
+    pub spell2_id: i64,
+    pub profile_icon_id: i64,
+    pub summoner_name: String,
+    pub champion_id: i64,
+    pub team_id: i64
+}
+
+#[derive(Deserialize, Debug)]
+pub struct PlatformDataDto {
+    pub id: String,
+    pub name: String,
+    pub locales: Vec<String>,
+    pub maintenances: Vec<StatusDto>,
+    pub incidents: Vec<StatusDto>
+}
+
+#[derive(Deserialize, Debug)]
+pub struct StatusDto {
+    pub id: i32,
+    pub maintenance_status: Option<MaintenanceStatus>,
+    pub incident_severity: Option<IncidentSeverity>,
+    pub titles: Vec<ContentDto>,
+    pub updates: Vec<UpdateDto>,
+    pub created_at: String,
+    pub archive_at: Option<String>,
+    pub updated_at: Option<String>,
+    pub platforms: Vec<Platform>
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ContentDto {
+    pub locale: String,
+    pub content: String
+}
+
+#[derive(Deserialize, Debug)]
+pub struct UpdateDto {
+    pub id: i32,
+    pub author: String,
+    pub publish: bool,
+    pub publish_locations: Vec<String>,
+    pub translations: Vec<ContentDto>,
+    pub updated_at: String
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountDto {
+    pub puuid: String,
+    pub game_name: Option<String>,
+    pub tag_line: Option<String>
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ActiveShardDto {
+    pub puuid: String,
+    pub game: Game,
+    pub active_shard: String
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ChampionMasteryDto {
+    pub champion_points_until_next_level: i64,
+    pub chest_granted: bool,
+    pub champion_id: i64,
+    pub last_play_time: i64,
+    pub champion_level: i32,
+    pub summoner_id: String,
+    pub champion_points: i32,
+    pub champion_points_since_last_level: i64,
+    pub tokens_earned: i32
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ChampionInfo {
+    pub max_new_player_level: i32,
+    pub free_champion_ids_for_new_players: Vec<i32>,
+    pub free_champion_ids: Vec<i32>
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "snake_case")]
+pub enum MaintenanceStatus {
+    Secheduled,
+    InProgress,
+    Complete
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "snake_case")]
+pub enum IncidentSeverity {
+    Info,
+    Warning,
+    Critical
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "snake_case")]
+pub enum Platform {
+    Windows,
+    #[serde(rename = "macos")]
+    MacOS,
+    Android,
+    #[serde(rename = "ios")]
+    IOS,
+    Ps4,
+    Xbone,
+    Switch
+}
+
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Lane {
     None,
@@ -456,4 +655,11 @@ pub enum EventType {
     TurretPlateDestroyed,
     WardKill,
     WardPlaced
+}
+
+#[derive(Deserialize, Debug, PartialEq, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum Game {
+    LOR,
+    VAL
 }
