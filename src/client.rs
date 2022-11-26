@@ -2,7 +2,6 @@ pub mod constants;
 use crate::endpoints::constants::Error as ApiError;
 use self::constants::Region;
 use std::{collections::HashMap, error::Error};
-use reqwest::StatusCode;
 use serde::de::DeserializeOwned;
 
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -63,8 +62,8 @@ impl Client {
         let status = resp.status();
 
         match status {
-            StatusCode::OK => Ok(resp.json().await?),
-            _ => Err(Box::new(ApiError::new(resp.json().await?)))
+            _ if status.as_u16() <= 300 => Ok(resp.json().await?),
+            _ => Err(Box::new(resp.json::<ApiError>().await?.status))
         }
     }
 }
