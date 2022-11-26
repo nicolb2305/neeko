@@ -683,3 +683,12 @@ pub enum Game {
     LOR,
     VAL
 }
+
+impl std::fmt::Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            Game::LOR => write!(f, "lor"),
+            Game::VAL => write!(f, "val")
+        }
+    }
+}

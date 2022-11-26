@@ -25,8 +25,7 @@ impl Client {
         encrypted_account_id: &str
     ) -> Result<SummonerDTO> {
         let endpoint = format!("/lol/summoner/v4/summoners/by-account/{encrypted_account_id}");
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
 
     pub async fn get_summoner_by_name(
@@ -34,8 +33,7 @@ impl Client {
         summoner_name: &str
     ) -> Result<SummonerDTO> {
         let endpoint = format!("/lol/summoner/v4/summoners/by-name/{summoner_name}");
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
     
     pub async fn get_summoner_by_puuid(
@@ -43,8 +41,7 @@ impl Client {
         encrypted_puuid: &str
     ) -> Result<SummonerDTO> {
         let endpoint = format!("/lol/summoner/v4/summoners/by-puuid/{encrypted_puuid}");
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
     
     pub async fn get_summoner_by_summoner_id(
@@ -52,8 +49,7 @@ impl Client {
         encrypted_summoner_id: &str
     ) -> Result<SummonerDTO> {
         let endpoint = format!("/lol/summoner/v4/summoners/{encrypted_summoner_id}");
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
 
     // Match V5
@@ -77,8 +73,7 @@ impl Client {
         insert_query(&mut query, "start", &start);
         insert_query(&mut query, "count", &count);
 
-        let req = self.request(Method::GET, endpoint, false, Some(query)).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, false, Some(query)).await
     }
 
     pub async fn get_match(
@@ -86,8 +81,7 @@ impl Client {
         match_id: String
     ) -> Result<MatchDto> {
         let endpoint = format!("/lol/match/v5/matches/{match_id}");
-        let req = self.request(Method::GET, endpoint, false, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, false, None).await
     }
 
     pub async fn get_match_timeline(
@@ -95,8 +89,7 @@ impl Client {
         match_id: String
     ) -> Result<MatchTimelineDto> {
         let endpoint = format!("/lol/match/v5/matches/{match_id}/timeline");
-        let req = self.request(Method::GET, endpoint, false, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, false, None).await
     }
 
     // Spectator V4
@@ -105,21 +98,18 @@ impl Client {
         encrypted_summoner_id: String
     ) -> Result<CurrentGameInfo> {
         let endpoint = format!("/lol/spectator/v4/active-games/by-summoner/{encrypted_summoner_id}");
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
 
     pub async fn get_featured_games(&self) -> Result<FeaturedGames> {
         let endpoint = "/lol/spectator/v4/featured-games".to_string();
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
 
     // LoL Status V4
     pub async fn get_platform_data(&self) -> Result<PlatformDataDto> {
         let endpoint = "/lol/status/v4/platform-data".to_string();
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
 
     // Account V1
@@ -128,8 +118,7 @@ impl Client {
         puuid: String
     ) -> Result<AccountDto> {
         let endpoint = format!("/riot/account/v1/accounts/by-puuid/{puuid}");
-        let req = self.request(Method::GET, endpoint, false, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, false, None).await
     }
     
     pub async fn get_account_by_riot_id(
@@ -138,8 +127,7 @@ impl Client {
         tag_line: String
     ) -> Result<AccountDto> {
         let endpoint = format!("/riot/account/v1/accounts/by-riot-id/{game_name}/{tag_line}");
-        let req = self.request(Method::GET, endpoint, false, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, false, None).await
     }
 
     pub async fn get_active_shard(
@@ -147,13 +135,8 @@ impl Client {
         game: Game,
         puuid: String
     ) -> Result<ActiveShardDto> {
-        let game = match game {
-            Game::LOR => "lor",
-            Game::VAL => "val"
-        };
         let endpoint = format!("/riot/account/v1/active-shards/by-game/{game}/by-puuid/{puuid}");
-        let req = self.request(Method::GET, endpoint, false, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, false, None).await
     }
 
     // Champion Mastery V4
@@ -162,8 +145,7 @@ impl Client {
         encrypted_summoner_id: String,
     ) -> Result<Vec<ChampionMasteryDto>> {
         let endpoint = format!("/lol/champion-mastery/v4/champion-masteries/by-summoner/{encrypted_summoner_id}");
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
     
     pub async fn get_champion_mastery_by_champion_id(
@@ -172,8 +154,7 @@ impl Client {
         champion_id: i64
     ) -> Result<ChampionMasteryDto> {
         let endpoint = format!("/lol/champion-mastery/v4/champion-masteries/by-summoner/{encrypted_summoner_id}/by-champion/{champion_id}");
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
     
     pub async fn get_top_champion_masteries(
@@ -186,8 +167,7 @@ impl Client {
         let mut query = HashMap::new();
         insert_query(&mut query, "count", &count);
 
-        let req = self.request(Method::GET, endpoint, true, Some(query)).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, Some(query)).await
     }
     
     pub async fn get_champion_mastery_score(
@@ -195,9 +175,7 @@ impl Client {
         encrypted_summoner_id: String
     ) -> Result<i32> {
         let endpoint = format!("/lol/champion-mastery/v4/scores/by-summoner/{encrypted_summoner_id}");
-
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
     
     // Champion V3
@@ -205,8 +183,6 @@ impl Client {
         &self
     ) -> Result<ChampionInfo> {
         let endpoint = "/lol/platform/v3/champion-rotations".to_string();
-
-        let req = self.request(Method::GET, endpoint, true, None).await?;
-        Ok(req)
+        self.request(Method::GET, endpoint, true, None).await
     }
 }
