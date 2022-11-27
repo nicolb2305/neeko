@@ -9,13 +9,13 @@ use tokio::{sync::Mutex, time::{Instant, Duration}};
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 type Result<T> = std::result::Result<T, reqwest::Error>;
 
-struct DataWithTimestamp<T> {
-    data: T,
+struct DataWithTimestamp {
+    data: Bytes,
     timestamp: Instant 
 }
 
-impl<T> DataWithTimestamp<T> {
-    fn new(data: T) -> Self {
+impl DataWithTimestamp {
+    fn new(data: Bytes) -> Self {
         Self {
             data,
             timestamp: Instant::now()
@@ -28,7 +28,7 @@ impl<T> DataWithTimestamp<T> {
 }
 
 struct Cache {
-    store: HashMap<String, DataWithTimestamp<Bytes>>,
+    store: HashMap<String, DataWithTimestamp>,
     lifetime: Duration
 }
 
@@ -40,17 +40,41 @@ impl Cache {
         }
     }
 
-    fn get(&self, key: &String) -> Option<Bytes> {
-        let timed_data = self.store.get(key)?;
-        match timed_data.valid(self.lifetime) {
-            true => Some(timed_data.data.clone()),
-            false => None
-        }
-    }
+    async fn get(
+        &mut self, 
+        url: &String, 
+        client: &Mutex<reqwest::Client>, 
+        method: reqwest::Method, 
+        query: Option<HashMap<&str, String>>
+    ) -> std::result::Result<Bytes, Box<dyn Error>>  {
+        match self.store.get(url) {
+            Some(v) if v.valid(self.lifetime) => Ok(v.data.clone()),
+            _ => {
+                println!("Cache miss!");
 
-    fn insert_get(&mut self, key: String, value: Bytes) -> Bytes {
-        self.store.insert(key.clone(), DataWithTimestamp::new(value));
-        self.store.get(&key).unwrap().data.clone()
+                let req = client
+                    .lock()
+                    .await
+                    .request(method, url);
+
+                let req = match query {
+                    Some(m) => req.query(&m),
+                    None => req
+                };
+
+                let resp = req.send().await?;
+                let status = resp.status();
+
+                match status {
+                    _ if status.as_u16() <= 300 => {
+                        let bytes_data = resp.bytes().await?;
+                        self.store.insert(url.clone(), DataWithTimestamp::new(bytes_data.clone()));
+                        Ok(bytes_data)
+                    },
+                    _ => return Err(Box::new(resp.json::<ApiError>().await?.status))
+                }
+            }
+        }
     }
 }
 
@@ -95,37 +119,9 @@ impl Client {
 
         let url = format!("https://{region}.api.riotgames.com{endpoint}");
 
-        let cache_data = self.cache.get(&url);
-
-        let resp = match cache_data {
-            Some(r) => r,
-            None => {
-                println!("Cache miss!");
-                let req_builder = self
-                    .client
-                    .lock()
-                    .await
-                    .request(method, &url);
-    
-                let req_builder = match query {
-                    Some(m) => req_builder.query(&m),
-                    None => req_builder
-                };
-    
-                let resp = req_builder
-                    .send()
-                    .await?;
-    
-                let status = resp.status();
-    
-                // self.cache.insert_get(url, resp.bytes().await?).await
-                match status {
-                    _ if status.as_u16() <= 300 => self.cache.insert_get(url, resp.bytes().await?),
-                    _ => return Err(Box::new(resp.json::<ApiError>().await?.status))
-                }
-            }
-        };
-
-        Ok(serde_json::from_slice(&resp)?)
+        match self.cache.get(&url, &self.client, method, query).await {
+            Ok(v) => Ok(serde_json::from_slice(&v)?),
+            Err(e) => Err(e)
+        }
     }
 }
