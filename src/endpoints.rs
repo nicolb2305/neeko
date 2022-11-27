@@ -21,7 +21,7 @@ fn insert_query<'a, T: ToString>(
 impl Client {
     //Summoner V4
     pub async fn get_summoner_by_account_id(
-        &self, 
+        &mut self, 
         encrypted_account_id: &str
     ) -> Result<SummonerDTO> {
         let endpoint = format!("/lol/summoner/v4/summoners/by-account/{encrypted_account_id}");
@@ -29,7 +29,7 @@ impl Client {
     }
 
     pub async fn get_summoner_by_name(
-        &self, 
+        &mut self, 
         summoner_name: &str
     ) -> Result<SummonerDTO> {
         let endpoint = format!("/lol/summoner/v4/summoners/by-name/{summoner_name}");
@@ -37,7 +37,7 @@ impl Client {
     }
     
     pub async fn get_summoner_by_puuid(
-        &self, 
+        &mut self, 
         encrypted_puuid: &str
     ) -> Result<SummonerDTO> {
         let endpoint = format!("/lol/summoner/v4/summoners/by-puuid/{encrypted_puuid}");
@@ -45,7 +45,7 @@ impl Client {
     }
     
     pub async fn get_summoner_by_summoner_id(
-        &self, 
+        &mut self, 
         encrypted_summoner_id: &str
     ) -> Result<SummonerDTO> {
         let endpoint = format!("/lol/summoner/v4/summoners/{encrypted_summoner_id}");
@@ -54,7 +54,7 @@ impl Client {
 
     // Match V5
     pub async fn get_matches(
-        &self, 
+        &mut self, 
         puuid: String, 
         start_time: Option<i64>, 
         end_time: Option<i64>,
@@ -77,7 +77,7 @@ impl Client {
     }
 
     pub async fn get_match(
-        &self, 
+        &mut self, 
         match_id: String
     ) -> Result<MatchDto> {
         let endpoint = format!("/lol/match/v5/matches/{match_id}");
@@ -85,7 +85,7 @@ impl Client {
     }
 
     pub async fn get_match_timeline(
-        &self,
+        &mut self,
         match_id: String
     ) -> Result<MatchTimelineDto> {
         let endpoint = format!("/lol/match/v5/matches/{match_id}/timeline");
@@ -94,27 +94,27 @@ impl Client {
 
     // Spectator V4
     pub async fn get_current_game_info_by_summoner(
-        &self,
+        &mut self,
         encrypted_summoner_id: String
     ) -> Result<CurrentGameInfo> {
         let endpoint = format!("/lol/spectator/v4/active-games/by-summoner/{encrypted_summoner_id}");
         self.request(Method::GET, endpoint, true, None).await
     }
 
-    pub async fn get_featured_games(&self) -> Result<FeaturedGames> {
+    pub async fn get_featured_games(&mut self) -> Result<FeaturedGames> {
         let endpoint = "/lol/spectator/v4/featured-games".to_string();
         self.request(Method::GET, endpoint, true, None).await
     }
 
     // LoL Status V4
-    pub async fn get_platform_data(&self) -> Result<PlatformDataDto> {
+    pub async fn get_platform_data(&mut self) -> Result<PlatformDataDto> {
         let endpoint = "/lol/status/v4/platform-data".to_string();
         self.request(Method::GET, endpoint, true, None).await
     }
 
     // Account V1
     pub async fn get_account_by_puuid(
-        &self,
+        &mut self,
         puuid: String
     ) -> Result<AccountDto> {
         let endpoint = format!("/riot/account/v1/accounts/by-puuid/{puuid}");
@@ -122,7 +122,7 @@ impl Client {
     }
     
     pub async fn get_account_by_riot_id(
-        &self,
+        &mut self,
         game_name: String,
         tag_line: String
     ) -> Result<AccountDto> {
@@ -131,7 +131,7 @@ impl Client {
     }
 
     pub async fn get_active_shard(
-        &self,
+        &mut self,
         game: Game,
         puuid: String
     ) -> Result<ActiveShardDto> {
@@ -141,7 +141,7 @@ impl Client {
 
     // Champion Mastery V4
     pub async fn get_champion_masteries(
-        &self,
+        &mut self,
         encrypted_summoner_id: String,
     ) -> Result<Vec<ChampionMasteryDto>> {
         let endpoint = format!("/lol/champion-mastery/v4/champion-masteries/by-summoner/{encrypted_summoner_id}");
@@ -149,7 +149,7 @@ impl Client {
     }
     
     pub async fn get_champion_mastery_by_champion_id(
-        &self,
+        &mut self,
         encrypted_summoner_id: String,
         champion_id: i64
     ) -> Result<ChampionMasteryDto> {
@@ -158,7 +158,7 @@ impl Client {
     }
     
     pub async fn get_top_champion_masteries(
-        &self,
+        &mut self,
         encrypted_summoner_id: String,
         count: Option<i32>
     ) -> Result<Vec<ChampionMasteryDto>> {
@@ -171,7 +171,7 @@ impl Client {
     }
     
     pub async fn get_champion_mastery_score(
-        &self,
+        &mut self,
         encrypted_summoner_id: String
     ) -> Result<i32> {
         let endpoint = format!("/lol/champion-mastery/v4/scores/by-summoner/{encrypted_summoner_id}");
@@ -180,7 +180,7 @@ impl Client {
     
     // Champion V3
     pub async fn get_champion_rotation(
-        &self
+        &mut self
     ) -> Result<ChampionInfo> {
         let endpoint = "/lol/platform/v3/champion-rotations".to_string();
         self.request(Method::GET, endpoint, true, None).await
