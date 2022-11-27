@@ -1,3 +1,4 @@
+#[derive(PartialEq, Hash, Clone)]
 pub enum Region {
     BR,
     EUNE,

@@ -1,5 +1,6 @@
 pub mod constants;
 use std::collections::HashMap;
+use cached::proc_macro::cached;
 use reqwest::Method;
 use crate::client::Client;
 use self::constants::{SummonerDTO, MatchDto, MatchTimelineDto, CurrentGameInfo, FeaturedGames, PlatformDataDto, AccountDto, ActiveShardDto, ChampionMasteryDto, ChampionInfo, Game};
@@ -18,6 +19,19 @@ fn insert_query<'a, T: ToString>(
     };
 }
 
+#[cached(
+    time=5,
+    result=true,
+    sync_writes=true
+)]
+async fn get_summoner_by_name(
+    client: Client, 
+    summoner_name: String
+) -> Result<SummonerDTO> {
+    let endpoint = format!("/lol/summoner/v4/summoners/by-name/{summoner_name}");
+    client.request(Method::GET, endpoint, true, None).await
+}
+
 impl Client {
     //Summoner V4
     pub async fn get_summoner_by_account_id(
@@ -28,12 +42,12 @@ impl Client {
         self.request(Method::GET, endpoint, true, None).await
     }
 
+
     pub async fn get_summoner_by_name(
         &self, 
         summoner_name: &str
     ) -> Result<SummonerDTO> {
-        let endpoint = format!("/lol/summoner/v4/summoners/by-name/{summoner_name}");
-        self.request(Method::GET, endpoint, true, None).await
+        get_summoner_by_name(self.clone(), summoner_name.to_string()).await
     }
     
     pub async fn get_summoner_by_puuid(

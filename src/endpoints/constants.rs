@@ -20,7 +20,7 @@ impl std::fmt::Display for ErrorStatus {
 
 impl std::error::Error for ErrorStatus {}
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SummonerDTO {
     pub account_id: String,

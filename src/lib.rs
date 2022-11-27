@@ -3,8 +3,9 @@ pub mod endpoints;
 
 #[cfg(test)]
 mod tests {
+    use tokio::time::sleep;
     use super::*;
-    use std::{error, env};
+    use std::{error, env, time::Duration};
     use crate::endpoints::constants::Game;
 
     type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -33,7 +34,11 @@ mod tests {
         let client = create_client(None).expect("Failed to create client.");
 
         let summoner_name = "Påsan";
-        let summoner = client.get_summoner_by_name(summoner_name).await.expect("Failed to get summoner.");
+        let mut summoner = client.get_summoner_by_name(summoner_name).await.expect("Failed to get summoner.");
+        for _ in 0..6 {
+            sleep(Duration::new(2, 0)).await;
+            summoner = client.get_summoner_by_name(summoner_name).await.expect("Failed to get summoner.");
+        }
 
         assert_eq!(summoner_name, summoner.name);
     }

@@ -1,15 +1,32 @@
 pub mod constants;
 use crate::endpoints::constants::Error as ApiError;
 use self::constants::Region;
-use std::{collections::HashMap, error::Error};
+use std::{collections::HashMap, error::Error, hash::{Hash, Hasher}};
 use serde::de::DeserializeOwned;
 
 // type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 type Result<T> = std::result::Result<T, reqwest::Error>;
 
+#[derive(Clone)]
 pub struct Client {
     client: reqwest::Client,
-    region: Region
+    region: Region,
+    api_key: String
+}
+
+impl PartialEq for Client {
+    fn eq(&self, other: &Self) -> bool {
+        self.region == other.region && self.api_key == other.api_key
+    }
+}
+
+impl Eq for Client {}
+
+impl Hash for Client {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.region.hash(state);
+        self.api_key.hash(state);
+    }
 }
 
 impl Client {
@@ -24,7 +41,8 @@ impl Client {
 
         Ok(Client {
             client,
-            region
+            region,
+            api_key
         })
     }
 
@@ -38,6 +56,7 @@ impl Client {
     where
         T: DeserializeOwned
     {
+        println!("Request made!");
         let region = if short_region {
             self.region.to_short_region()
         } else {
