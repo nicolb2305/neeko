@@ -3,8 +3,10 @@ pub mod endpoints;
 
 #[cfg(test)]
 mod tests {
+    use tokio::time::sleep;
+
     use super::*;
-    use std::{error, env};
+    use std::{error, env, time::Duration};
     use crate::endpoints::constants::Game;
 
     type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
@@ -15,14 +17,14 @@ mod tests {
             None => env::var("riot_api_key")?
         };
         let region = client::constants::Region::EUW;
-        let client = client::Client::new(api_key, region)?;
+        let client = client::Client::new(api_key, region, Some(5))?;
         Ok(client)
     }
 
     #[tokio::test]
     #[should_panic(expected = "Invalid api_key")]
     async fn make_request_with_bad_api_key() {
-        let client = create_client(Some("".to_string())).expect("Failed to create client.");
+        let mut client = create_client(Some("".to_string())).expect("Failed to create client.");
 
         let summoner_name = "Påsan";
         client.get_summoner_by_name(summoner_name).await.expect("Invalid api_key");
@@ -30,7 +32,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_summoner() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let summoner_name = "Påsan";
         let summoner = client.get_summoner_by_name(summoner_name).await.expect("Failed to get summoner.");
@@ -40,7 +42,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_matches() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let puuid = "nfyUVw1yBg9vqTFWtUR3DDVnmR7r2oCc2EuNABo49fRGMXKFzSptSbGNbnhsljxQG-SfEVjTSMpNOQ".to_string();
         let matches = client.get_matches(puuid, None, None, None, None, None, Some(5)).await.expect("Failed to get matches");
@@ -58,7 +60,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_match() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let match_id = "EUW1_6151255544".to_string();
         let match_ = client.get_match(match_id.clone()).await.expect("Failed to get match");
@@ -68,7 +70,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_match_timeline() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let match_id = "EUW1_6151255544".to_string();
         let match_timeline = client.get_match_timeline(match_id.clone()).await.expect("Failed to get match");
@@ -78,7 +80,7 @@ mod tests {
 
     // #[tokio::test]
     // async fn get_current_game_info_by_summoner() {
-    //     let client = create_client().expect("Failed to create client.");
+    //     let mut client = create_client().expect("Failed to create client.");
 
     //     let match_id = "TUuxK2yGBiAFT5hhOLEkILm2I-v4FK2WjCxpZ2i1vxl9_PxOlsfv5Nvv9Q".to_string();
     //     let match_timeline = client.get_current_game_info_by_summoner(match_id.clone()).await.expect("Failed to get match");
@@ -89,7 +91,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_featured_games() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let featured_games = client.get_featured_games().await.expect("Failed to get featured games");
 
@@ -98,7 +100,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_platform_data() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let platform_data = client.get_platform_data().await.expect("Failed to get platform data");
 
@@ -108,7 +110,7 @@ mod tests {
     #[tokio::test]
     async fn get_account_by_puuid() {
         let developer_api_key = env::var("riot_api_key_developer").expect("Failed to get developer api_key");
-        let client = create_client(Some(developer_api_key)).expect("Failed to create client.");
+        let mut client = create_client(Some(developer_api_key)).expect("Failed to create client.");
 
         let puuid = "svh2qpmF4m9b9dJ0iPBSVhJVVs6MFIFyNm8Oo__8yCPZnsKCGG3yGkFPxtuFoa5Rbbqp9KekRwKNZQ";
         let account = client.get_account_by_puuid(puuid.to_string()).await.expect("Failed to get account info");
@@ -119,7 +121,7 @@ mod tests {
     #[tokio::test]
     async fn get_account_by_riot_id() {
         let developer_api_key = env::var("riot_api_key_developer").expect("Failed to get developer api_key");
-        let client = create_client(Some(developer_api_key)).expect("Failed to create client.");
+        let mut client = create_client(Some(developer_api_key)).expect("Failed to create client.");
 
         let tag_line = "Neeko".to_string();
         let game_name = "Påsan".to_string();
@@ -132,7 +134,7 @@ mod tests {
     #[tokio::test]
     async fn get_active_shard() {
         let developer_api_key = env::var("riot_api_key_developer").expect("Failed to get developer api_key");
-        let client = create_client(Some(developer_api_key)).expect("Failed to create client.");
+        let mut client = create_client(Some(developer_api_key)).expect("Failed to create client.");
 
         let game = Game::LOR;
         let puuid = "1UtbqBdSx_-HfxzSKGq_lmgF-J6_LNFhkaoTBV0abdzt4EDth9qju30M61mLNQ9g2AX2pX4DRvQJTA".to_string();
@@ -144,7 +146,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_champion_masteries() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let encrypted_summoner_id = "-_Qcp4WDs8X7X_E62lgulgzHRHpNZ4vjk0TAYzMV9zCcWzY".to_string();
         let champion_masteries = client
@@ -157,7 +159,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_champion_mastery_by_champion_id() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let encrypted_summoner_id = "-_Qcp4WDs8X7X_E62lgulgzHRHpNZ4vjk0TAYzMV9zCcWzY".to_string();
         let champion_id = 518;
@@ -172,7 +174,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_top_champion_masteries() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let encrypted_summoner_id = "-_Qcp4WDs8X7X_E62lgulgzHRHpNZ4vjk0TAYzMV9zCcWzY".to_string();
         let count = 5;
@@ -187,7 +189,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_champion_mastery_score() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let encrypted_summoner_id = "-_Qcp4WDs8X7X_E62lgulgzHRHpNZ4vjk0TAYzMV9zCcWzY".to_string();
         let champion_mastery_score = client
@@ -200,7 +202,7 @@ mod tests {
 
     #[tokio::test]
     async fn get_champion_rotation() {
-        let client = create_client(None).expect("Failed to create client.");
+        let mut client = create_client(None).expect("Failed to create client.");
 
         let champion_rotation = client
             .get_champion_rotation()
@@ -208,5 +210,19 @@ mod tests {
             .expect("Failed to get champion rotation");
 
         assert_eq!(champion_rotation.max_new_player_level, 10);
+    }
+
+    #[tokio::test]
+    async fn cache_test() {
+        let mut client = create_client(None).expect("Failed to create client.");
+
+        let summoner_name = "Påsan";
+        let summoner = client.get_summoner_by_name(summoner_name).await.expect("Failed to get summoner.");
+        for _ in 0..6 {
+            sleep(Duration::from_secs(2)).await;
+            client.get_summoner_by_name(summoner_name).await.expect("Failed to get summoner.");
+        }
+
+        assert_eq!(summoner_name, summoner.name);
     }
 }
